@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VisionBoost | AI Video Quality Enhancer</title>
+  <meta name="description" content="Enhance old and low-quality videos with AI upscaling, interpolation, denoising, stabilization, and color HDR correction." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060816;
+      --bg-soft: #0f1630;
+      --card: rgba(20, 29, 56, 0.7);
+      --text: #f7f9ff;
+      --muted: #b8c3e0;
+      --brand: #6d7bff;
+      --brand-2: #34d6ff;
+      --accent: #81ffc4;
+      --border: rgba(182, 199, 255, 0.2);
+      --shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% -20%, #1d2b62 0%, var(--bg) 45%), var(--bg);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1120px, 92%);
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      background: rgba(6, 8, 22, 0.65);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(177, 194, 255, 0.12);
+      z-index: 5;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 0 22px rgba(77, 120, 255, 0.7);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 130px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      color: #030612;
+      background: linear-gradient(135deg, var(--brand-2), var(--accent));
+      box-shadow: 0 14px 30px rgba(52, 214, 255, 0.25);
+    }
+
+    .btn-secondary {
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      align-items: center;
+      gap: 48px;
+      padding: 78px 0 84px;
+    }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(122, 139, 255, 0.15);
+      border: 1px solid rgba(159, 175, 255, 0.25);
+      color: #dbe4ff;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      line-height: 1.1;
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      margin: 0;
+    }
+
+    .lead {
+      font-size: 1.08rem;
+      color: var(--muted);
+      margin: 18px 0 28px;
+      max-width: 52ch;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hero-stats strong { color: #fff; }
+
+    .hero-visual {
+      border-radius: 26px;
+      padding: 14px;
+      background: linear-gradient(145deg, rgba(113, 134, 255, 0.3), rgba(44, 78, 182, 0.08));
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(173, 191, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      min-height: 360px;
+    }
+
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(129,255,196,0.25), transparent 35%),
+                  radial-gradient(circle at 10% 80%, rgba(52,214,255,0.22), transparent 35%);
+      pointer-events: none;
+    }
+
+    .video-concept {
+      position: relative;
+      z-index: 1;
+      border-radius: 18px;
+      height: 100%;
+      min-height: 330px;
+      overflow: hidden;
+      background: #050914;
+      border: 1px solid rgba(180, 198, 255, 0.18);
+    }
+
+    .scanline,
+    .glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .scanline {
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.05) 0,
+        rgba(255,255,255,0.05) 1px,
+        transparent 3px,
+        transparent 4px
+      );
+      animation: drift 7s linear infinite;
+    }
+
+    .glow {
+      background: linear-gradient(120deg, rgba(109,123,255,0.15), transparent 45%, rgba(52,214,255,0.22));
+      mix-blend-mode: screen;
+      animation: pulse 4.5s ease-in-out infinite;
+    }
+
+    .timeline {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(5, 12, 30, 0.72);
+      border: 1px solid rgba(160, 182, 255, 0.2);
+      font-size: 0.82rem;
+      color: #e3ebff;
+    }
+
+    .bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.2);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      width: 66%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand-2), var(--accent));
+      animation: load 3s ease-in-out infinite;
+    }
+
+    section {
+      padding: 72px 0;
+    }
+
+    h2 {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      margin: 0 0 10px;
+      line-height: 1.2;
+    }
+
+    .section-copy {
+      color: var(--muted);
+      max-width: 65ch;
+      margin: 0 0 34px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .feature {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      background: rgba(109,123,255,0.18);
+      border: 1px solid rgba(166, 182, 255, 0.25);
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .step {
+      background: rgba(16, 24, 49, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .step-number {
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .compare-wrap {
+      background: rgba(12, 18, 38, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .comparison {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 320px;
+      border: 1px solid rgba(173, 189, 255, 0.2);
+    }
+
+    .pane {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .before {
+      background: linear-gradient(120deg, #12131e 0%, #434c6f 50%, #5a6588 100%);
+      filter: saturate(0.45) blur(0.2px);
+      color: #d7deee;
+    }
+
+    .after {
+      background: linear-gradient(120deg, #162459 0%, #2f7fff 50%, #53f6ff 100%);
+      clip-path: inset(0 50% 0 0);
+      transition: clip-path 0.15s ease;
+      color: #edfeff;
+    }
+
+    .divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background: #fff;
+      box-shadow: 0 0 22px rgba(255, 255, 255, 0.9);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .comparison input[type="range"] {
+      width: 100%;
+      margin-top: 18px;
+      accent-color: var(--brand-2);
+    }
+
+    footer {
+      padding: 46px 0;
+      border-top: 1px solid rgba(177, 194, 255, 0.12);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(20px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes load {
+      0% { transform: translateX(-40%); }
+      50% { transform: translateX(40%); }
+      100% { transform: translateX(130%); }
+    }
+
+    @media (max-width: 960px) {
+      .hero,
+      .feature-grid,
+      .steps { grid-template-columns: 1fr; }
+      .hero { padding-top: 54px; }
+      .nav-actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true"></span>
+        VisionBoost
+      </a>
+      <div class="nav-actions">
+        <a href="#" class="btn btn-secondary">Log In</a>
+        <a href="#" class="btn btn-primary">Start Free Trial</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="container hero" id="hero">
+      <div>
+        <span class="pill">AI Video Remastering for Creators & Teams</span>
+        <h1>Turn Blurry Footage into <br />Cinematic 4K & 8K in Minutes.</h1>
+        <p class="lead">
+          VisionBoost uses advanced AI to upscale quality, remove noise, smooth frame rates, stabilize motion, and restore faces + color—so every video looks ready for modern screens.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#">Try Free</a>
+          <a class="btn btn-secondary" href="#">Upload Video</a>
+        </div>
+        <div class="hero-stats">
+          <span><strong>3.2M+</strong> clips enhanced</span>
+          <span><strong>98.7%</strong> user satisfaction</span>
+          <span><strong>5x faster</strong> than manual editing</span>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-label="Background video animation concept">
+        <div class="video-concept">
+          <div class="scanline"></div>
+          <div class="glow"></div>
+          <div class="timeline">
+            Enhancing: wedding_raw_480p.mp4
+            <span class="bar"><span></span></span>
+            4K HDR Output
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" id="features">
+      <h2>Everything You Need to Restore and Upgrade Every Frame</h2>
+      <p class="section-copy">Built for creators, agencies, and video teams who need studio-quality results without a studio-sized workflow.</p>
+      <div class="feature-grid">
+        <article class="feature">
+          <div class="icon">🖥️</div>
+          <h3>AI Upscaling</h3>
+          <p>Transform 480p footage into sharp 4K or 8K with detail-aware super resolution.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">🎞️</div>
+          <h3>Frame Interpolation</h3>
+          <p>Increase FPS smoothly for fluid motion in sports, action, and cinematic sequences.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">✨</div>
+          <h3>Noise Reduction</h3>
+          <p>Remove grain and compression artifacts while preserving texture and important details.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">🎯</div>
+          <h3>Motion Stabilization</h3>
+          <p>Fix shaky handheld clips with intelligent scene tracking and stabilization.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">🙂</div>
+          <h3>Face Enhancement</h3>
+          <p>Recover facial clarity for portraits, interviews, and social media close-ups.</p>
+        </article>
+        <article class="feature">
+          <div class="icon">🌈</div>
+          <h3>Color + HDR Enhancement</h3>
+          <p>Boost dynamic range and rebalance tones for richer, true-to-life color output.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="container" id="how-it-works">
+      <h2>How It Works</h2>
+      <p class="section-copy">Go from old or low-quality to polished in three simple steps.</p>
+      <div class="steps">
+        <article class="step">
+          <span class="step-number">1</span>
+          <h3>Upload</h3>
+          <p>Drag and drop your video. VisionBoost supports popular formats and batch processing.</p>
+        </article>
+        <article class="step">
+          <span class="step-number">2</span>
+          <h3>Enhance</h3>
+          <p>Choose presets or custom controls for upscaling, denoising, interpolation, and color.</p>
+        </article>
+        <article class="step">
+          <span class="step-number">3</span>
+          <h3>Download</h3>
+          <p>Preview instantly, then export your enhanced video in optimized 4K/8K quality.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="container" id="comparison">
+      <h2>Before & After: See the VisionBoost Difference</h2>
+      <p class="section-copy">Move the slider to compare a noisy, low-resolution clip with VisionBoost enhanced output.</p>
+      <div class="compare-wrap">
+        <div class="comparison" id="comparisonBox">
+          <div class="pane before">Before · 480p</div>
+          <div class="pane after" id="afterPane">After · 4K HDR</div>
+          <div class="divider" id="divider"></div>
+        </div>
+        <label for="slider" class="section-copy" style="display:block; margin: 12px 0 4px;">Drag to compare quality</label>
+        <input type="range" id="slider" min="0" max="100" value="50" />
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> VisionBoost. Elevate every frame with AI.
+  </footer>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const afterPane = document.getElementById('afterPane');
+    const divider = document.getElementById('divider');
+
+    slider.addEventListener('input', (event) => {
+      const value = Number(event.target.value);
+      afterPane.style.clipPath = `inset(0 ${100 - value}% 0 0)`;
+      divider.style.left = `${value}%`;
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
